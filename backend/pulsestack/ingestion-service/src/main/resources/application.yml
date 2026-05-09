@@ -3,21 +3,27 @@ spring:
     name: ingestion-service
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:pulsestack}
-    username: ${DB_USER:pulsestack}
-    password: ${DB_PASSWORD:pulsestack_dev}
+    url: jdbc:postgresql://127.0.0.1:5432/pulsestack
+    username: pulsestack
+    password: password
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: validate   # Flyway übernimmt das Schema – JPA nur lesen
+      ddl-auto: validate
     show-sql: false
     open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+    url: jdbc:postgresql://127.0.0.1:5432/pulsestack
+    user: pulsestack
+    password: password
 
   data:
     redis:

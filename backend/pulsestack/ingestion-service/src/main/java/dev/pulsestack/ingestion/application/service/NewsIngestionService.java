@@ -54,7 +54,7 @@ public class NewsIngestionService {
      * Hauptjob: laeuft alle 5 Stunden (konfigurierbar).
      * Shared Ingestion: ein Lauf fuer ALLE User gleichzeitig.
      */
-    @Scheduled(fixedDelayString = "${pulsestack.ingestion.poll-interval-hours:5}h")
+    @Scheduled(fixedDelayString = "PT5H")
     public void runIngestionForAllChannels() {
         log.info("Starting ingestion run for all channels and sources");
         List<Channel> channels = channelLoader.loadAll();
