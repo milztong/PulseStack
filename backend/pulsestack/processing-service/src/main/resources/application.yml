@@ -3,9 +3,9 @@ spring:
     name: processing-service
 
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:pulsestack}
-    username: ${DB_USER:pulsestack}
-    password: ${DB_PASSWORD:pulsestack_dev}
+    url: jdbc:postgresql://127.0.0.1:5432/pulsestack
+    username: pulsestack
+    password: password
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -13,14 +13,20 @@ spring:
       ddl-auto: validate
     show-sql: false
     open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+    url: jdbc:postgresql://127.0.0.1:5432/pulsestack
+    user: pulsestack
+    password: password
 
   kafka:
-    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    bootstrap-servers: localhost:9092
     consumer:
       group-id: processing-service-group
       auto-offset-reset: earliest
@@ -28,6 +34,8 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "dev.pulsestack.*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: "dev.pulsestack.domain.model.NewsItem"
 
 server:
   port: 8083
