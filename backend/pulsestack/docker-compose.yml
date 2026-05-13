@@ -5,8 +5,9 @@ services:
     container_name: pulsestack-postgres
     environment:
       POSTGRES_USER: pulsestack
-      POSTGRES_PASSWORD: pulsestack_dev
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: pulsestack
+      POSTGRES_HOST_AUTH_METHOD: trust
     ports:
       - "5432:5432"
     volumes:
