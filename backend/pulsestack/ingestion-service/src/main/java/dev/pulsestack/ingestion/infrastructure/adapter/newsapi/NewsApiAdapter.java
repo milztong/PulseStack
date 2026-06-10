@@ -14,11 +14,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Fragt newsapi.org nach aktuellen Schlagzeilen zu einem Thema.
- * Nutzt /v2/everything mit sortBy=publishedAt für frische Inhalte.
- * Nur aktiv wenn pulsestack.newsapi.key gesetzt ist.
- */
 @Component
 @ConditionalOnProperty(name = "pulsestack.newsapi.key")
 public class NewsApiAdapter implements NewsSourcePort {

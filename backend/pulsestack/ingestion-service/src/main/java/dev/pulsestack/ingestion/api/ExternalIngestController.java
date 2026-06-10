@@ -19,16 +19,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 
-/**
- * Erlaubt externen Services (StockPredictionGame, eigene Skripte, etc.)
- * direkt Events in den PulseStack-Feed einzuspeisen.
- *
- * Authentifizierung: einfaches Admin-Secret im Header "X-Ingest-Secret".
- * Service-to-Service — kein JWT nötig.
- *
- * Alle eingehenden Events durchlaufen denselben Pipeline:
- *   Redis-Dedup → Kafka raw-news → Processing-Service → WebSocket
- */
 @RestController
 @RequestMapping("/api/v1/ingest")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -76,7 +66,6 @@ public class ExternalIngestController {
                         "Unknown channel: '" + request.channelName() + "'. Must be one of the 25 configured channels."
                 ));
 
-        // Dedup-Check — gleiche externalId wird nicht doppelt gepublished
         if (duplicateChecker.isAlreadySeen(request.externalId())) {
             log.debug("Duplicate external event skipped: {}", request.externalId());
             return;

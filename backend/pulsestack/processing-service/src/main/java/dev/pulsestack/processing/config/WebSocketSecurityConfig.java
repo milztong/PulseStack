@@ -23,11 +23,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-/**
- * Validiert JWT beim STOMP CONNECT-Frame.
- * Client sendet Token im Authorization-Header: "Bearer <token>"
- * Ungültige Tokens → StompCommand wird abgebrochen (MessageDeliveryException).
- */
+
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketSecurityConfig implements WebSocketMessageBrokerConfigurer {

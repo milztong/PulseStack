@@ -20,10 +20,8 @@ public class ChannelEntity {
     @Column
     private String description;
 
-    // Konstruktoren
     protected ChannelEntity() {}
 
-    // Getter
     public UUID getId() { return id; }
     public String getName() { return name; }
     public String getDisplayName() { return displayName; }

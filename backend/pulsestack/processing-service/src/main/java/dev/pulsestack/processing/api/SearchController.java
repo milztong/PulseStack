@@ -10,10 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * Cross-Platform Volltextsuche über alle gespeicherten News-Items.
- * Durchsucht Titel aller Quellen (Reddit, YouTube, GitHub, NewsAPI) gleichzeitig.
- */
 @RestController
 @RequestMapping("/api/v1/search")
 @CrossOrigin(origins = "http://localhost:5173")

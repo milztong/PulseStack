@@ -45,7 +45,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                         new UsernamePasswordAuthenticationToken(username, null, List.of());
                 SecurityContextHolder.getContext().setAuthentication(auth);
             } catch (JwtException ignored) {
-                // Invalid token — SecurityContext stays empty, security config will reject if needed
             }
         }
         chain.doFilter(request, response);

@@ -14,11 +14,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Fragt die YouTube Data API v3 nach Videos zu einem Thema.
- * Nur aktiv wenn pulsestack.youtube.api-key gesetzt ist.
- * Open/Closed: implementiert NewsSourcePort — kein Code im Service geändert.
- */
 @Component
 @ConditionalOnProperty(name = "pulsestack.youtube.api-key")
 public class YouTubeApiAdapter implements NewsSourcePort {

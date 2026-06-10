@@ -3,11 +3,6 @@ package dev.pulsestack.domain.model;
 import java.time.Instant;
 import java.util.UUID;
 
-/**
- * Zentrales Domain-Objekt fuer alle News-Inhalte.
- * Kein Spring, keine JPA-Annotations - reines Java.
- * JPA-Mapping passiert im infrastructure-Layer (NewsItemEntity).
- */
 public record NewsItem(
         UUID id,
         String externalId,

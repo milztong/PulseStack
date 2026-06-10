@@ -9,12 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Use-Case: Verarbeitet ein eingehendes News-Event.
- * 1. Duplikat-Check gegen PostgreSQL
- * 2. Speichern
- * 3. WebSocket Broadcast
- */
 @Service
 public class NewsProcessingService {
 

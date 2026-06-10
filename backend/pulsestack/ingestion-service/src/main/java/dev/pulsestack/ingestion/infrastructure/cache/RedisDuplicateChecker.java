@@ -9,13 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 
-/**
- * Implementiert DuplicateChecker mit Redis SETNX.
- *
- * SETNX ist atomar: Set if Not eXists.
- * Gibt true zurueck wenn der Key NICHT gesetzt wurde (= schon vorhanden = Duplikat).
- * TTL: nach 24h werden Keys automatisch geloescht.
- */
+
 @Component
 public class RedisDuplicateChecker implements DuplicateChecker {
 
@@ -37,7 +31,6 @@ public class RedisDuplicateChecker implements DuplicateChecker {
     public boolean isAlreadySeen(String externalId) {
         String key = KEY_PREFIX + externalId;
 
-        // setIfAbsent = SETNX: gibt true wenn Key NEU gesetzt wurde (= noch nicht gesehen)
         Boolean wasNew = redisTemplate.opsForValue().setIfAbsent(key, "1", dedupTtl);
 
         boolean isDuplicate = !Boolean.TRUE.equals(wasNew);

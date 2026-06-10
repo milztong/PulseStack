@@ -17,18 +17,6 @@ import org.springframework.stereotype.Controller;
 import java.security.Principal;
 import java.util.UUID;
 
-/**
- * STOMP Message Handler für den Chat.
- *
- * Client → Server (SEND):
- *   /app/chat.send      → Nachricht senden, in DB speichern, an Channel broadcasten
- *   /app/chat.typing    → "User is typing…" broadcasten (nicht persistiert)
- *   /app/presence.heartbeat → Presence-Heartbeat aktualisieren
- *
- * Server → Client (SUBSCRIBE):
- *   /topic/chat/{channelId}   → neue Nachrichten
- *   /topic/typing/{channelId} → Typing-Events
- */
 @Controller
 public class ChatController {
 
@@ -48,10 +36,6 @@ public class ChatController {
         this.presenceService   = presenceService;
     }
 
-    /**
-     * Nachricht empfangen, in PostgreSQL persistieren, an Channel broadcasten.
-     * Principal.getName() liefert den JWT-Username (gesetzt vom ChannelInterceptor).
-     */
     @MessageMapping("chat.send")
     public void sendMessage(@Valid @Payload SendMessageRequest request, Principal principal) {
         String username = resolveName(principal);
@@ -67,11 +51,6 @@ public class ChatController {
         );
     }
 
-    /**
-     * "User is typing…" — nicht persistiert, nur live broadcasten.
-     * Server schickt nur den Username zurück, nicht die komplette TypingEvent-Payload,
-     * damit andere Clients wissen wer gerade tippt.
-     */
     @MessageMapping("chat.typing")
     public void typing(@Payload TypingEvent event, Principal principal) {
         String username = resolveName(principal);
@@ -82,9 +61,6 @@ public class ChatController {
         );
     }
 
-    /**
-     * Presence-Heartbeat: Client sendet alle 30s, Redis-TTL wird verlängert.
-     */
     @MessageMapping("presence.heartbeat")
     public void heartbeat(@Payload String channelIdStr, Principal principal) {
         try {

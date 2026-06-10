@@ -5,6 +5,5 @@ public enum NewsSource {
     YOUTUBE,
     GITHUB,
     NEWSAPI,
-    /** Events aus dem StockPredictionGame — Vorhersagen und Auflösungen. */
     STOCK_PREDICTOR
 }

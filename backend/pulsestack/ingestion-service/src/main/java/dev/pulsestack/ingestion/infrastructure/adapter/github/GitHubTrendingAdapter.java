@@ -14,11 +14,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.Instant;
 import java.util.List;
 
-/**
- * Fragt die GitHub Search API nach Trending Repositories zu einem Thema.
- * Sortiert nach Stars — zeigt die populärsten Projekte.
- * Nur aktiv wenn pulsestack.github.token gesetzt ist.
- */
 @Component
 @ConditionalOnProperty(name = "pulsestack.github.token")
 public class GitHubTrendingAdapter implements NewsSourcePort {

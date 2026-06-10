@@ -16,13 +16,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-/**
- * Zentraler Use-Case: Pollt alle 25 Channels bei allen Quellen,
- * filtert Duplikate und publisht neue Items nach Kafka.
- *
- * SRP: Nur Orchestrierung. Kein HTTP-Code, kein Kafka-Code, kein Redis-Code.
- * DIP: Nur Ports bekannt, keine Adapter-Implementierungen.
- */
 @Service
 public class NewsIngestionService {
 
@@ -50,10 +43,6 @@ public class NewsIngestionService {
         this.channelLoader = channelLoader;
     }
 
-    /**
-     * Hauptjob: laeuft alle 5 Stunden (konfigurierbar).
-     * Shared Ingestion: ein Lauf fuer ALLE User gleichzeitig.
-     */
     @Scheduled(fixedDelayString = "PT5H")
     public void runIngestionForAllChannels() {
         log.info("Starting ingestion run for all channels and sources");

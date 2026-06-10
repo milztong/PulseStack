@@ -10,10 +10,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
 
-/**
- * Holt OAuth2 Access Token von Reddit via Client Credentials Flow.
- * Token wird gecacht bis er abläuft.
- */
 @Component
 public class RedditTokenProvider {
 

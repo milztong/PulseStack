@@ -24,7 +24,6 @@ public class AnalyticsController {
         Instant since = Instant.now().minus(Math.min(days, 30), ChronoUnit.DAYS);
         List<Object[]> rows = analyticsRepository.countByChannelAndSource(since);
 
-        // Aggregate per channel: channel may have multiple rows (one per source)
         Map<String, long[]> counts = new LinkedHashMap<>();
         Map<String, String> names = new LinkedHashMap<>();
 

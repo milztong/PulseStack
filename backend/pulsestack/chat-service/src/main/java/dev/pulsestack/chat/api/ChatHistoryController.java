@@ -25,7 +25,6 @@ public class ChatHistoryController {
         this.presenceService = presenceService;
     }
 
-    /** Letzte N Nachrichten eines Channels — neueste zuerst. */
     @GetMapping("/channel/{channelId}")
     public List<ChatMessageResponse> getHistory(
             @PathVariable UUID channelId,
@@ -39,7 +38,6 @@ public class ChatHistoryController {
                 .toList();
     }
 
-    /** Aktuell online sichtbare User in einem Channel (aus Redis). */
     @GetMapping("/channel/{channelId}/presence")
     public Set<Object> getPresence(@PathVariable UUID channelId) {
         return presenceService.getOnlineUsers(channelId);

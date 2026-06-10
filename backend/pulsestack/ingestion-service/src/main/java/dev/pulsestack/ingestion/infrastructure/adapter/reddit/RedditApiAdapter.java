@@ -62,7 +62,6 @@ public class RedditApiAdapter implements NewsSourcePort {
                     .toList();
 
         } catch (Exception e) {
-            // Nie den ganzen Job crashen lassen – leere Liste + Log
             log.error("Failed to fetch from Reddit for channel {}: {}",
                     channel.name(), e.getMessage(), e);
             return List.of();
