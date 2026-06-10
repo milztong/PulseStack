@@ -1,0 +1,222 @@
+# ============================================================
+# PulseStack + StockPredictor — Unified Compose
+#
+# StockPredictor läuft als 5. Microservice im PulseStack-Ökosystem:
+#   - Gemeinsame Infrastruktur (Postgres, Redis, Kafka)
+#   - Auth ausschließlich über PulseStack auth-service (:8084)
+#   - JWT-Token funktioniert in beiden Apps (shared secret)
+#   - StockPredictor-Events fließen in PulseStack #finance-Channel
+#
+# Starten:
+#   cp .env.example .env   # Werte eintragen
+#   docker compose up -d
+#
+# Services & Ports:
+#   :5173  Frontend (Vite dev) — extern gestartet
+#   :8080  StockPredictor (standalone, falls separat gestartet)
+#   :8081  PulseStack ingestion-service
+#   :8082  PulseStack chat-service
+#   :8083  PulseStack processing-service
+#   :8084  PulseStack auth-service          ← Login/Register für alle Apps
+#   :8085  StockPredictor (als Microservice)
+#   :8090  Kafka UI
+# ============================================================
+
+services:
+
+  # ─── Gemeinsame Infrastruktur ────────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: pulsestack-postgres
+    environment:
+      POSTGRES_USER: pulsestack
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: pulsestack
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulsestack"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: pulsestack-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: pulsestack-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      CLUSTER_ID: pulsestack-cluster-01
+    ports:
+      - "9092:9092"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: pulsestack-kafka-ui
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: pulsestack
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      - kafka
+
+  # ─── PulseStack Services ─────────────────────────────────────
+
+  auth-service:
+    build:
+      context: ./backend/pulsestack
+      dockerfile: auth-service/Dockerfile
+    container_name: pulsestack-auth
+    ports:
+      - "8084:8084"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: pulsestack
+      DB_USER: pulsestack
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      JWT_SECRET: ${JWT_SECRET}
+      SPRING_PROFILES_ACTIVE: prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8084/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  ingestion-service:
+    build:
+      context: ./backend/pulsestack
+      dockerfile: ingestion-service/Dockerfile
+    container_name: pulsestack-ingestion
+    ports:
+      - "8081:8081"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: pulsestack
+      DB_USER: pulsestack
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      REDIS_HOST: redis
+      KAFKA_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
+      PULSESTACK_INGEST_SECRET: ${PULSESTACK_INGEST_SECRET}
+      REDDIT_CLIENT_ID: ${REDDIT_CLIENT_ID:-}
+      REDDIT_CLIENT_SECRET: ${REDDIT_CLIENT_SECRET:-}
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      NEWSAPI_KEY: ${NEWSAPI_KEY:-}
+      SPRING_PROFILES_ACTIVE: prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  processing-service:
+    build:
+      context: ./backend/pulsestack
+      dockerfile: processing-service/Dockerfile
+    container_name: pulsestack-processing
+    ports:
+      - "8083:8083"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: pulsestack
+      DB_USER: pulsestack
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      KAFKA_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
+      SPRING_PROFILES_ACTIVE: prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  chat-service:
+    build:
+      context: ./backend/pulsestack
+      dockerfile: chat-service/Dockerfile
+    container_name: pulsestack-chat
+    ports:
+      - "8082:8082"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: pulsestack
+      DB_USER: pulsestack
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+      REDIS_HOST: redis
+      JWT_SECRET: ${JWT_SECRET}
+      SPRING_PROFILES_ACTIVE: prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ─── StockPredictor — 5. Microservice ───────────────────────
+
+  stock-predictor:
+    build:
+      context: ../Stock_Predictor_Backend
+    container_name: stock-predictor
+    ports:
+      - "8085:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/stock_predictor
+      SPRING_DATASOURCE_USERNAME: pulsestack
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-password}
+      POLYGON_API_KEY: ${POLYGON_API_KEY:-}
+      # Gleicher Secret wie PulseStack auth-service → Token funktioniert in beiden Apps
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRY_MS: 86400000
+      FRONTEND_URL: http://localhost:5173
+      # PulseStack Integration — immer aktiv in dieser Umgebung
+      PULSESTACK_INGEST_URL: http://ingestion-service:8081
+      PULSESTACK_INGEST_SECRET: ${PULSESTACK_INGEST_SECRET}
+      PREDICTOR_BASE_URL: http://localhost:8085
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

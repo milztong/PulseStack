@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: processing-service
+
+  datasource:
+    url: jdbc:postgresql://127.0.0.1:5432/pulsestack
+    username: pulsestack
+    password: password
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    # Schema wird zentral vom ingestion-service verwaltet (shared DB).
+    # processing-service ist reiner Konsument — kein eigenständiges Flyway.
+    enabled: false
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: processing-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "dev.pulsestack.*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: "dev.pulsestack.domain.model.NewsItem"
+
+server:
+  port: 8083
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+pulsestack:
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-in-production-min-32-chars}
+
+logging:
+  level:
+    dev.pulsestack: DEBUG
+    org.springframework.kafka: INFO
+  pattern:
+    console: "%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
