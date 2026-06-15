@@ -43,7 +43,7 @@ public class NewsIngestionService {
         this.channelLoader = channelLoader;
     }
 
-    @Scheduled(fixedDelayString = "PT5H")
+    @Scheduled(initialDelay = 0, fixedDelayString = "PT5H")
     public void runIngestionForAllChannels() {
         log.info("Starting ingestion run for all channels and sources");
         List<Channel> channels = channelLoader.loadAll();
