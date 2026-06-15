@@ -106,7 +106,7 @@ export function AnalyticsDashboard() {
 
       {!loading && chartData.length > 0 && (
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {(['Reddit','YouTube','GitHub','NewsAPI'] as const).map((src, i) => {
+          {(['Reddit','YouTube','GitHub','NewsAPI'] as const).map((src) => {
             const key = src.toLowerCase() as keyof typeof SOURCE_COLORS;
             const total = data.reduce((s, d) => s + (d[key as keyof TrendDataPoint] as number), 0);
             return (
