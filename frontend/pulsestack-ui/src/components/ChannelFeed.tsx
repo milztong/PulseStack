@@ -19,7 +19,7 @@ export function ChannelFeed({ channelId, channelName }: Props) {
   useEffect(() => {
     if (!channelId) return;
     setLoading(true);
-    fetch(`http://localhost:8083/api/v1/news/channel/${channelId}`)
+    fetch(`${import.meta.env.VITE_PROCESSING_URL ?? 'http://localhost:8083'}/api/v1/news/channel/${channelId}`)
       .then(res => res.json())
       .then(setHistoryItems)
       .catch(() => setHistoryItems([]))

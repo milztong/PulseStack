@@ -4,7 +4,7 @@ import type { IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import type { NewsItem } from '../types';
 
-const WEBSOCKET_URL = 'http://localhost:8083/ws';
+const WEBSOCKET_URL = `${import.meta.env.VITE_PROCESSING_URL ?? 'http://localhost:8083'}/ws`;
 const MAX_ITEMS = 50;
 
 function getToken(): string | null {

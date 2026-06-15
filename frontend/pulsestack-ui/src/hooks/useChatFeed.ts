@@ -4,8 +4,8 @@ import type { IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import type { ChatMessage } from '../types/Chat';
 
-const CHAT_WS_URL = 'http://localhost:8082/ws';
-const CHAT_API_URL = 'http://localhost:8082/api/v1/chat';
+const CHAT_WS_URL = `${import.meta.env.VITE_CHAT_URL ?? 'http://localhost:8082'}/ws`;
+const CHAT_API_URL = `${import.meta.env.VITE_CHAT_URL ?? 'http://localhost:8082'}/api/v1/chat`;
 const MAX_MESSAGES = 100;
 const HEARTBEAT_INTERVAL_MS = 30_000;
 const TYPING_DEBOUNCE_MS = 1_500;

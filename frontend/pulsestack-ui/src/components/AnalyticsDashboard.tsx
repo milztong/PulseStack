@@ -12,7 +12,7 @@ interface TrendDataPoint {
   newsapi: number;
 }
 
-const ANALYTICS_URL = 'http://localhost:8083/api/v1/analytics/trends';
+const ANALYTICS_URL = `${import.meta.env.VITE_PROCESSING_URL ?? 'http://localhost:8083'}/api/v1/analytics/trends`;
 
 const SOURCE_COLORS = {
   reddit:  '#ff4500',

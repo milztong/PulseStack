@@ -7,7 +7,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { ChatPanel } from './components/ChatPanel';
 import { useAuth } from './hooks/useAuth';
 
-const API_URL = 'http://localhost:8081/api/v1/channels';
+const API_URL = `${import.meta.env.VITE_INGESTION_URL ?? 'http://localhost:8081'}/api/v1/channels`;
 
 interface ChannelData {
   id: string;
