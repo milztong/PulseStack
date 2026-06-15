@@ -22,8 +22,17 @@ public class ChannelEntity {
 
     protected ChannelEntity() {}
 
+    public ChannelEntity(String name, String displayName, String description) {
+        this.name = name;
+        this.displayName = displayName;
+        this.description = description;
+    }
+
     public UUID getId() { return id; }
     public String getName() { return name; }
     public String getDisplayName() { return displayName; }
     public String getDescription() { return description; }
+
+    public void setDisplayName(String displayName) { this.displayName = displayName; }
+    public void setDescription(String description) { this.description = description; }
 }
