@@ -25,6 +25,5 @@ export const CHANNELS: Channel[] = [
   { id: '', name: 'politics',    displayName: 'Politics',      description: 'World politics, elections, policy' },
   { id: '', name: 'fitness',     displayName: 'Fitness',       description: 'Workout, nutrition, health' },
   { id: '', name: 'movies',      displayName: 'Movies & TV',   description: 'Films, series, streaming' },
-  { id: '', name: 'music',       displayName: 'Music',         description: 'New releases, concerts, charts' },
   { id: '', name: 'food',        displayName: 'Food',          description: 'Recipes, restaurants, food trends' },
 ];

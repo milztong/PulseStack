@@ -28,5 +28,4 @@ INSERT INTO channels (name, display_name, description) VALUES
     ('politics',    'Politics',         'World politics, elections, policy'),
     ('fitness',     'Fitness',          'Workout, nutrition, health'),
     ('movies',      'Movies & TV',      'Films, series, streaming, reviews'),
-    ('music',       'Music',            'New releases, concerts, charts'),
     ('food',        'Food',             'Recipes, restaurants, food trends');
