@@ -1,11 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ChannelFeed } from './components/ChannelFeed';
-import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { LoginPage } from './components/LoginPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ChatPanel } from './components/ChatPanel';
 import { useAuth } from './hooks/useAuth';
+
+const AnalyticsDashboard = lazy(() =>
+  import('./components/AnalyticsDashboard').then(m => ({ default: m.AnalyticsDashboard }))
+);
 
 const API_URL = `${import.meta.env.VITE_INGESTION_URL ?? 'http://localhost:8081'}/api/v1/channels`;
 
@@ -97,7 +100,9 @@ export default function App() {
         )}
         {view === 'analytics' && (
           <ErrorBoundary>
-            <AnalyticsDashboard />
+            <Suspense fallback={<div className="flex-1 flex items-center justify-center text-gray-400">Loading analytics…</div>}>
+              <AnalyticsDashboard />
+            </Suspense>
           </ErrorBoundary>
         )}
       </div>
