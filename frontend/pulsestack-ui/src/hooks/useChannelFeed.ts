@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import type { IMessage } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
 import type { NewsItem } from '../types';
 
-const WEBSOCKET_URL = `${import.meta.env.VITE_PROCESSING_URL ?? 'http://localhost:8083'}/ws`;
+const BASE_URL = import.meta.env.VITE_PROCESSING_URL ?? 'http://localhost:8083';
+const WEBSOCKET_URL = BASE_URL.replace(/^http/, 'ws') + '/ws';
 const MAX_ITEMS = 50;
 
 function getToken(): string | null {
@@ -26,8 +26,7 @@ export function useChannelFeed(channelId: string | null) {
     const token = getToken();
 
     const client = new Client({
-      webSocketFactory: () => new SockJS(WEBSOCKET_URL),
-      // JWT im STOMP CONNECT-Frame — validiert vom ChannelInterceptor
+      brokerURL: WEBSOCKET_URL,
       connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
       onConnect: () => {
         setConnected(true);

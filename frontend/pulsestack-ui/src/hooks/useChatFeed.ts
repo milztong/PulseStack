@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
 import type { IMessage } from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
 import type { ChatMessage } from '../types/Chat';
 
-const CHAT_WS_URL = `${import.meta.env.VITE_CHAT_URL ?? 'http://localhost:8082'}/ws`;
-const CHAT_API_URL = `${import.meta.env.VITE_CHAT_URL ?? 'http://localhost:8082'}/api/v1/chat`;
+const BASE_URL = import.meta.env.VITE_CHAT_URL ?? 'http://localhost:8082';
+const CHAT_WS_URL = BASE_URL.replace(/^http/, 'ws') + '/ws';
+const CHAT_API_URL = BASE_URL + '/api/v1/chat';
 const MAX_MESSAGES = 100;
 const HEARTBEAT_INTERVAL_MS = 30_000;
 const TYPING_DEBOUNCE_MS = 1_500;
@@ -26,7 +26,6 @@ export function useChatFeed(channelId: string | null, username: string | null) {
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const typingTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
-  // ─── Nachrichten senden ───────────────────────────────────────────────────
   const sendMessage = useCallback((content: string) => {
     if (!clientRef.current?.connected || !channelId || !content.trim()) return;
     clientRef.current.publish({
@@ -35,7 +34,6 @@ export function useChatFeed(channelId: string | null, username: string | null) {
     });
   }, [channelId]);
 
-  // ─── Typing-Event senden (debounced durch Frontend) ───────────────────────
   const sendTyping = useCallback(() => {
     if (!clientRef.current?.connected || !channelId || !username) return;
     clientRef.current.publish({
@@ -44,58 +42,45 @@ export function useChatFeed(channelId: string | null, username: string | null) {
     });
   }, [channelId, username]);
 
-  // ─── WebSocket + Subscriptions ────────────────────────────────────────────
   useEffect(() => {
     if (!channelId) return;
 
     const token = getToken();
 
-    // History laden
     fetch(`${CHAT_API_URL}/channel/${channelId}`)
       .then(r => r.json())
-      .then((history: ChatMessage[]) =>
-        // API gibt neueste zuerst zurück → umdrehen für chronologische Anzeige
-        setMessages(history.reverse())
-      )
+      .then((history: ChatMessage[]) => setMessages(history.reverse()))
       .catch(() => setMessages([]));
 
     const client = new Client({
-      webSocketFactory: () => new SockJS(CHAT_WS_URL),
+      brokerURL: CHAT_WS_URL,
       connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
 
       onConnect: () => {
         setConnected(true);
 
-        // Neue Chat-Nachrichten
         client.subscribe(`/topic/chat/${channelId}`, (msg: IMessage) => {
           const chatMsg: ChatMessage = JSON.parse(msg.body);
           setMessages(prev => [...prev, chatMsg].slice(-MAX_MESSAGES));
         });
 
-        // "User is typing…" — Server sendet nur den Username
         client.subscribe(`/topic/typing/${channelId}`, (msg: IMessage) => {
-          const typer = msg.body.replace(/^"|"$/g, ''); // JSON-String entquoten
-          if (typer === username) return;               // eigenes Typing nicht anzeigen
+          const typer = msg.body.replace(/^"|"$/g, '');
+          if (typer === username) return;
 
           setTypingUsers(prev => prev.includes(typer) ? prev : [...prev, typer]);
 
-          // Nach TYPING_DEBOUNCE_MS ohne neues Event entfernen
           clearTimeout(typingTimers.current[typer]);
           typingTimers.current[typer] = setTimeout(() => {
             setTypingUsers(prev => prev.filter(u => u !== typer));
           }, TYPING_DEBOUNCE_MS);
         });
 
-        // Presence-Heartbeat alle 30s
         heartbeatRef.current = setInterval(() => {
           if (client.connected) {
-            client.publish({
-              destination: '/app/presence.heartbeat',
-              body: JSON.stringify(channelId),
-            });
+            client.publish({ destination: '/app/presence.heartbeat', body: JSON.stringify(channelId) });
           }
         }, HEARTBEAT_INTERVAL_MS);
-        // Sofortiger erster Heartbeat
         client.publish({ destination: '/app/presence.heartbeat', body: JSON.stringify(channelId) });
       },
 
