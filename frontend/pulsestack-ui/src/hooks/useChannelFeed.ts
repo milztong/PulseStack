@@ -25,6 +25,14 @@ export function useChannelFeed(channelId: string | null) {
 
     const token = getToken();
 
+    // Vorhandene Items per REST laden, bevor wir auf neue Live-Items warten
+    fetch(`${BASE_URL}/api/v1/news/channel/${channelId}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+      .then(res => (res.ok ? res.json() : []))
+      .then((existing: NewsItem[]) => setItems(existing.slice(0, MAX_ITEMS)))
+      .catch(() => console.warn('Could not load existing news items'));
+
     const client = new Client({
       brokerURL: WEBSOCKET_URL,
       connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
