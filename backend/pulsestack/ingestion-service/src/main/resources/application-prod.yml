@@ -4,6 +4,9 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
 
+  flyway:
+    validate-on-migrate: false
+
   data:
     redis:
       host: ${REDIS_HOST}
