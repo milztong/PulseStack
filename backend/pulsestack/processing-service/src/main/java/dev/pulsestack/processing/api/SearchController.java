@@ -12,7 +12,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/search")
-@CrossOrigin(origins = "http://localhost:5173")
 @Tag(name = "Search", description = "Cross-platform full-text search across all news sources")
 public class SearchController {
 

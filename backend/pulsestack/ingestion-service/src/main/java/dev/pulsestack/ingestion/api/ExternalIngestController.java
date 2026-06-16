@@ -21,7 +21,6 @@ import java.time.Instant;
 
 @RestController
 @RequestMapping("/api/v1/ingest")
-@CrossOrigin(origins = "http://localhost:5173")
 @Tag(name = "External Ingest", description = "Service-to-Service Ingest für externe Event-Quellen")
 public class ExternalIngestController {
 

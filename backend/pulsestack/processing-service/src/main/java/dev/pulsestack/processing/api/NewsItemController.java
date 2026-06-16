@@ -11,7 +11,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/news")
-@CrossOrigin(origins = "http://localhost:5173")
 @Tag(name = "News", description = "News feed per Channel")
 public class NewsItemController {
 

@@ -10,7 +10,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1/analytics")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AnalyticsController {
 
     private final AnalyticsRepository analyticsRepository;

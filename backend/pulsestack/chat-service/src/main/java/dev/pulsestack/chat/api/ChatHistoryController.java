@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/chat")
-@CrossOrigin(origins = "http://localhost:5173")
 public class ChatHistoryController {
 
     private static final int DEFAULT_PAGE_SIZE = 50;
