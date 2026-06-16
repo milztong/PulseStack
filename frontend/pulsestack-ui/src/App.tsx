@@ -120,7 +120,7 @@ export default function App() {
         {view === 'predictor' && (
           <ErrorBoundary>
             <Suspense fallback={<div className="flex-1 flex items-center justify-center text-gray-400">Loading predictor…</div>}>
-              <PredictorView token={auth.token} />
+              <PredictorView token={auth.token} username={auth.username} />
             </Suspense>
           </ErrorBoundary>
         )}

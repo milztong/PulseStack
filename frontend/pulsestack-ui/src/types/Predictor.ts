@@ -46,6 +46,10 @@ export interface ResolvedChallenge {
   prices: PricePoint[];
 }
 
+export interface PredictionWithResult extends PredictionResponse {
+  result?: ResultResponse;
+}
+
 export interface ResultResponse {
   resultId: string;
   predictionId: string;

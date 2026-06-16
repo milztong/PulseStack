@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type {
-  DailyStock, PredictionResponse, LeaderboardEntry, ResolvedChallenge, Direction,
+  DailyStock, PredictionResponse, PredictionWithResult, LeaderboardEntry, ResolvedChallenge,
+  ResultResponse, Direction,
 } from '../types/Predictor';
 
 const BASE_URL = `${import.meta.env.VITE_STOCKPREDICTOR_URL ?? 'http://localhost:8080'}/api`;
@@ -11,7 +12,7 @@ function authHeaders(token: string | null): HeadersInit {
 
 export function usePredictor(token: string | null) {
   const [dailyStock, setDailyStock] = useState<DailyStock | null>(null);
-  const [myPredictions, setMyPredictions] = useState<PredictionResponse[]>([]);
+  const [myPredictions, setMyPredictions] = useState<PredictionWithResult[]>([]);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [resolvedChallenge, setResolvedChallenge] = useState<ResolvedChallenge | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,14 +25,32 @@ export function usePredictor(token: string | null) {
       .catch(() => setDailyStock(null));
   }, [token]);
 
-  const loadMyPredictions = useCallback(() => {
-    return fetch(`${BASE_URL}/predictions/my`, { headers: authHeaders(token) })
-      .then(r => (r.ok ? r.json() : []))
-      .then((preds: PredictionResponse[]) => {
-        setMyPredictions(preds);
-        return preds;
-      })
-      .catch(() => []);
+  const loadMyPredictions = useCallback(async () => {
+    try {
+      const res = await fetch(`${BASE_URL}/predictions/my`, { headers: authHeaders(token) });
+      const preds: PredictionResponse[] = res.ok ? await res.json() : [];
+
+      // Für aufgelöste Vorhersagen das Ergebnis (Ticker-Reveal) nachladen — wie im Original-Dashboard
+      const withResults: PredictionWithResult[] = await Promise.all(
+        preds.map(async p => {
+          if (p.status !== 'RESOLVED') return p;
+          try {
+            const resultRes = await fetch(`${BASE_URL}/results/${p.id}`, { headers: authHeaders(token) });
+            if (!resultRes.ok) return p;
+            const result: ResultResponse = await resultRes.json();
+            return { ...p, result };
+          } catch {
+            return p;
+          }
+        })
+      );
+
+      setMyPredictions(withResults);
+      return withResults;
+    } catch {
+      setMyPredictions([]);
+      return [];
+    }
   }, [token]);
 
   const loadLeaderboard = useCallback(() => {
