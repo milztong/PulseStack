@@ -5,23 +5,25 @@
  * auf dem Linux-Build (Vercel/Rolldown) wiederholt mit TDZ/Hoisting-Fehlern
  * ("X is not a function") gecrasht ist — auch nach Lazy-Loading und
  * manueller Chunk-Konsolidierung. Für einfache Linien reicht natives SVG.
+ *
+ * Optik orientiert sich am Original-StockPredictor-Chart (weiße Linie,
+ * dezentes dunkles Grid statt buntem Theme).
  */
 interface SimpleLineChartProps {
   data: { date: string; close: number }[];
   height?: number;
-  color?: string;
 }
 
-export function SimpleLineChart({ data, height = 220, color = '#818cf8' }: SimpleLineChartProps) {
+export function SimpleLineChart({ data, height = 220 }: SimpleLineChartProps) {
   if (data.length === 0) {
     return (
-      <div style={{ height }} className="flex items-center justify-center text-gray-500 text-sm">
-        Keine Daten verfügbar.
+      <div style={{ height }} className="flex items-center justify-center text-neutral-600 text-xs tracking-widest uppercase">
+        Keine Daten verfügbar
       </div>
     );
   }
 
-  const width = 600; // viewBox-Breite, skaliert via SVG responsiv
+  const width = 600;
   const paddingX = 8;
   const paddingY = 12;
 
@@ -36,22 +38,27 @@ export function SimpleLineChart({ data, height = 220, color = '#818cf8' }: Simpl
     return `${x},${y}`;
   });
 
+  const gridLinesY = [0.25, 0.5, 0.75].map(f => paddingY + f * (height - paddingY * 2));
+
   const first = data[0];
   const last = data[data.length - 1];
 
   return (
     <div>
       <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} preserveAspectRatio="none">
+        {gridLinesY.map(y => (
+          <line key={y} x1={0} y1={y} x2={width} y2={y} stroke="#1a1a1a" strokeWidth={1} />
+        ))}
         <polyline
           points={points.join(' ')}
           fill="none"
-          stroke={color}
-          strokeWidth={2}
+          stroke="#ffffff"
+          strokeWidth={1.5}
           strokeLinejoin="round"
           strokeLinecap="round"
         />
       </svg>
-      <div className="flex justify-between text-xs text-gray-500 mt-1">
+      <div className="flex justify-between text-xs text-neutral-600 mt-2">
         <span>{first.date}</span>
         <span>{last.date}</span>
       </div>

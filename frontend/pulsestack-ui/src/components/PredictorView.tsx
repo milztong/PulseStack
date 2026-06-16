@@ -17,16 +17,26 @@ export function PredictorView({ token }: PredictorViewProps) {
   } = usePredictor(token);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-gray-950 text-white">
+    <div className="flex-1 flex flex-col overflow-hidden bg-[#0a0a0a] text-white relative">
+      {/* Background grid — wie im Original */}
+      <div
+        className="fixed inset-0 opacity-[0.03] pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
+          backgroundSize: '60px 60px',
+        }}
+      />
+
       {/* Obere Hälfte — Tabs */}
-      <div className="flex-1 min-h-0 overflow-y-auto border-b border-gray-800">
-        <div className="flex items-center gap-1 px-4 pt-4">
+      <div className="flex-1 min-h-0 overflow-y-auto border-b border-neutral-900 relative z-10">
+        <div className="flex items-center gap-8 px-6 py-5 border-b border-neutral-900">
           {(['spielen', 'dashboard', 'rangliste'] as Tab[]).map(t => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
-                tab === t ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'
+              className={`text-xs tracking-widest uppercase transition-colors ${
+                tab === t ? 'text-white' : 'text-neutral-500 hover:text-white'
               }`}
             >
               {t}
@@ -34,9 +44,11 @@ export function PredictorView({ token }: PredictorViewProps) {
           ))}
         </div>
 
-        <div className="p-4">
-          {loading && <p className="text-gray-400">Lade…</p>}
-          {error && <p className="text-red-400">{error}</p>}
+        <div className="px-6 py-8 max-w-4xl">
+          {loading && (
+            <p className="text-xs text-neutral-500 tracking-widest uppercase">Lade…</p>
+          )}
+          {error && <p className="text-red-400 text-sm">{error}</p>}
 
           {!loading && tab === 'spielen' && (
             <SpielenTab dailyStock={dailyStock} onSubmit={submitPrediction} />
@@ -51,12 +63,12 @@ export function PredictorView({ token }: PredictorViewProps) {
       </div>
 
       {/* Untere Hälfte — Auflösung der Aktie */}
-      <div className="flex-1 min-h-0 overflow-y-auto p-4">
-        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
+      <div className="flex-1 min-h-0 overflow-y-auto px-6 py-8 relative z-10">
+        <p className="text-xs text-neutral-500 tracking-widest uppercase mb-4">
           Letzte Auflösung
-        </h3>
+        </p>
         {!resolvedChallenge && (
-          <p className="text-gray-500 text-sm">Noch keine aufgelöste Challenge vorhanden.</p>
+          <p className="text-neutral-600 text-sm">Noch keine aufgelöste Challenge vorhanden.</p>
         )}
         {resolvedChallenge && (
           <ResolutionPanel challenge={resolvedChallenge} />
@@ -80,7 +92,7 @@ function SpielenTab({
   const [submitted, setSubmitted] = useState(false);
 
   if (!dailyStock) {
-    return <p className="text-gray-500 text-sm">Heutige Challenge noch nicht verfügbar.</p>;
+    return <p className="text-neutral-600 text-sm">Heutige Challenge noch nicht verfügbar.</p>;
   }
 
   const lastPrice = dailyStock.prices[dailyStock.prices.length - 1]?.close ?? 0;
@@ -100,98 +112,154 @@ function SpielenTab({
     }
   };
 
+  if (submitted) {
+    return (
+      <div className="space-y-8 pt-4">
+        <div className="w-px h-16 bg-neutral-700 mx-auto" />
+        <div className="text-center">
+          <p className="text-xs text-neutral-500 tracking-widest uppercase mb-3">
+            Vorhersage gespeichert
+          </p>
+          <h1 className="text-3xl font-light tracking-tight mb-1">
+            {direction === 'UP' ? '↑ Steigt' : '↓ Fällt'}
+          </h1>
+          <p className="text-4xl font-light tabular-nums mt-4">${Number(targetPrice).toFixed(2)}</p>
+        </div>
+        <p className="text-xs text-neutral-600 text-center">
+          Das Ergebnis wird am {dailyStock.targetDate} aufgedeckt.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
+    <div className="space-y-10">
+      {/* Stock header */}
+      <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Unbekannte Aktie</p>
-          <p className="text-lg font-semibold">{dailyStock.codename}</p>
+          <p className="text-xs text-neutral-500 tracking-widest uppercase mb-1">Unbekannte Aktie</p>
+          <h1 className="text-2xl font-light tracking-tight">{dailyStock.codename}</h1>
         </div>
         <div className="text-right">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Letzter Kurs</p>
-          <p className="text-lg font-semibold">${lastPrice.toFixed(2)}</p>
+          <p className="text-xs text-neutral-500 tracking-widest uppercase mb-1">Letzter Kurs</p>
+          <p className="text-2xl font-light tabular-nums">${lastPrice.toFixed(2)}</p>
         </div>
       </div>
 
-      <div className="bg-gray-900 rounded-xl p-3 mb-4">
-        <SimpleLineChart data={chartData} height={260} color="#818cf8" />
+      {/* Chart */}
+      <div className="border border-neutral-900 bg-neutral-950 p-4">
+        <SimpleLineChart data={chartData} height={260} />
       </div>
 
-      <p className="text-xs text-gray-500 mb-3">Zieldatum: {dailyStock.targetDate}</p>
+      {/* Info bar */}
+      <div className="flex items-center gap-8 text-xs text-neutral-500 border-t border-neutral-900 pt-4">
+        <div>
+          <span className="tracking-widest uppercase">Zeitraum</span>
+          <span className="ml-3 text-neutral-400">
+            {dailyStock.prices[0]?.date} → {dailyStock.prices[dailyStock.prices.length - 1]?.date}
+          </span>
+        </div>
+        <div>
+          <span className="tracking-widest uppercase">Zieldatum</span>
+          <span className="ml-3 text-neutral-400">{dailyStock.targetDate}</span>
+        </div>
+        <div>
+          <span className="tracking-widest uppercase">Datenpunkte</span>
+          <span className="ml-3 text-neutral-400">{dailyStock.prices.length}</span>
+        </div>
+      </div>
 
-      {submitted ? (
-        <p className="text-green-400 text-sm">Vorhersage abgegeben! Schau im Dashboard-Tab nach.</p>
-      ) : (
-        <>
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <button
-              onClick={() => setDirection('UP')}
-              className={`py-3 rounded-lg text-sm font-medium border transition-colors ${
-                direction === 'UP'
-                  ? 'bg-green-600/20 border-green-500 text-green-400'
-                  : 'border-gray-700 text-gray-400 hover:border-gray-600'
-              }`}
-            >
-              ↑ Steigt
-            </button>
-            <button
-              onClick={() => setDirection('DOWN')}
-              className={`py-3 rounded-lg text-sm font-medium border transition-colors ${
-                direction === 'DOWN'
-                  ? 'bg-red-600/20 border-red-500 text-red-400'
-                  : 'border-gray-700 text-gray-400 hover:border-gray-600'
-              }`}
-            >
-              ↓ Fällt
-            </button>
-          </div>
+      {/* Prediction form */}
+      <div className="border border-neutral-900 p-6 space-y-6">
+        <p className="text-xs text-neutral-500 tracking-widest uppercase">
+          Deine Vorhersage für {dailyStock.targetDate}
+        </p>
 
-          <label className="block text-xs text-gray-500 uppercase tracking-wide mb-1">Zielpreis ($)</label>
-          <input
-            type="number"
-            step="0.01"
-            value={targetPrice}
-            onChange={e => setTargetPrice(e.target.value)}
-            placeholder={lastPrice.toFixed(2)}
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm mb-3 focus:outline-none focus:border-indigo-500"
-          />
-
-          {submitError && <p className="text-red-400 text-xs mb-3">{submitError}</p>}
-
+        <div className="grid grid-cols-2 gap-3">
           <button
-            onClick={handleSubmit}
-            disabled={!direction || !targetPrice || submitting}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-800 disabled:text-gray-500 rounded-lg py-2.5 text-sm font-medium transition-colors"
+            onClick={() => setDirection('UP')}
+            className={`py-4 text-xs tracking-widest uppercase border transition-all ${
+              direction === 'UP'
+                ? 'border-green-500 text-green-400 bg-green-500/5'
+                : 'border-neutral-800 text-neutral-500 hover:border-neutral-600'
+            }`}
           >
-            {submitting ? 'Wird gesendet…' : 'Vorhersage abgeben'}
+            ↑ Steigt
           </button>
-        </>
-      )}
+          <button
+            onClick={() => setDirection('DOWN')}
+            className={`py-4 text-xs tracking-widest uppercase border transition-all ${
+              direction === 'DOWN'
+                ? 'border-red-500 text-red-400 bg-red-500/5'
+                : 'border-neutral-800 text-neutral-500 hover:border-neutral-600'
+            }`}
+          >
+            ↓ Fällt
+          </button>
+        </div>
+
+        <div>
+          <label className="block text-xs text-neutral-500 tracking-widest uppercase mb-2">Zielpreis ($)</label>
+          <div className="flex items-center border border-neutral-800 focus-within:border-neutral-500 transition-colors">
+            <span className="px-4 text-neutral-600 text-sm">$</span>
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              value={targetPrice}
+              onChange={e => setTargetPrice(e.target.value)}
+              placeholder={lastPrice.toFixed(2)}
+              className="flex-1 bg-transparent text-white px-2 py-3 text-sm outline-none placeholder:text-neutral-700"
+            />
+          </div>
+        </div>
+
+        {submitError && <p className="text-red-400 text-xs tracking-wide">{submitError}</p>}
+
+        <button
+          onClick={handleSubmit}
+          disabled={!direction || !targetPrice || submitting}
+          className="w-full bg-white text-black text-xs tracking-widest uppercase py-3 hover:bg-neutral-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          {submitting ? 'Wird gespeichert…' : 'Vorhersage abgeben'}
+        </button>
+      </div>
     </div>
   );
 }
 
 function DashboardTab({ predictions }: { predictions: ReturnType<typeof usePredictor>['myPredictions'] }) {
   if (predictions.length === 0) {
-    return <p className="text-gray-500 text-sm">Du hast noch keine Vorhersagen abgegeben.</p>;
+    return (
+      <div className="border border-neutral-900 p-12 text-center">
+        <p className="text-neutral-500 text-sm">Du hast noch keine Vorhersagen abgegeben.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-2">
+    <div className="border border-neutral-900 divide-y divide-neutral-900">
+      <div className="grid grid-cols-4 px-4 py-3 text-xs text-neutral-600 tracking-widest uppercase">
+        <span>Aktie</span>
+        <span>Richtung</span>
+        <span>Zieldatum</span>
+        <span className="text-right">Status</span>
+      </div>
       {predictions.map(p => (
-        <div key={p.id} className="bg-gray-900 rounded-lg p-3 flex items-center justify-between">
+        <div key={p.id} className="grid grid-cols-4 px-4 py-4 text-sm items-center">
           <div>
-            <p className="text-sm font-medium">{p.stockCodename}</p>
-            <p className="text-xs text-gray-500">Ziel: {p.targetDate}</p>
+            <p className="text-white text-xs">{p.stockCodename}</p>
+            <p className="text-neutral-600 text-xs mt-0.5 tabular-nums">${p.predictedPrice.toFixed(2)}</p>
           </div>
-          <div className="text-right">
-            <p className={`text-sm font-medium ${p.direction === 'UP' ? 'text-green-400' : 'text-red-400'}`}>
-              {p.direction === 'UP' ? '↑' : '↓'} ${p.predictedPrice.toFixed(2)}
-            </p>
-            <p className={`text-xs ${p.status === 'RESOLVED' ? 'text-gray-400' : 'text-yellow-400'}`}>
-              {p.status === 'RESOLVED' ? 'Aufgelöst' : 'Ausstehend'}
-            </p>
-          </div>
+          <span className={`text-xs tracking-widest ${p.direction === 'UP' ? 'text-green-400' : 'text-red-400'}`}>
+            {p.direction === 'UP' ? '↑ Steigt' : '↓ Fällt'}
+          </span>
+          <span className="text-neutral-400 text-xs">{p.targetDate}</span>
+          <span className={`text-right text-xs tracking-widest uppercase ${
+            p.status === 'RESOLVED' ? 'text-neutral-600' : 'text-yellow-600'
+          }`}>
+            {p.status === 'RESOLVED' ? 'Abgeschlossen' : 'Ausstehend'}
+          </span>
         </div>
       ))}
     </div>
@@ -200,30 +268,28 @@ function DashboardTab({ predictions }: { predictions: ReturnType<typeof usePredi
 
 function RanglisteTab({ entries }: { entries: ReturnType<typeof usePredictor>['leaderboard'] }) {
   if (entries.length === 0) {
-    return <p className="text-gray-500 text-sm">Noch keine Rangliste verfügbar.</p>;
+    return (
+      <div className="border border-neutral-900 p-12 text-center">
+        <p className="text-neutral-500 text-sm">Noch keine Rangliste verfügbar.</p>
+      </div>
+    );
   }
 
   return (
-    <table className="w-full text-sm">
-      <thead>
-        <tr className="text-left text-gray-500 text-xs uppercase tracking-wide">
-          <th className="pb-2 pr-3">#</th>
-          <th className="pb-2 pr-3">Name</th>
-          <th className="pb-2 pr-3 text-right">Score</th>
-          <th className="pb-2 text-right">Aufgelöst</th>
-        </tr>
-      </thead>
-      <tbody>
-        {entries.map(e => (
-          <tr key={e.rank} className="border-t border-gray-800">
-            <td className="py-2 pr-3 text-gray-400">{e.rank}</td>
-            <td className="py-2 pr-3">{e.username}</td>
-            <td className="py-2 pr-3 text-right font-medium">{e.totalScore}</td>
-            <td className="py-2 text-right text-gray-400">{e.predictionsResolved}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+    <div className="border border-neutral-900 divide-y divide-neutral-900">
+      <div className="grid grid-cols-4 px-4 py-3 text-xs text-neutral-600 tracking-widest uppercase">
+        <span>#</span>
+        <span className="col-span-2">Spieler</span>
+        <span className="text-right">Punkte</span>
+      </div>
+      {entries.map(e => (
+        <div key={e.rank} className="grid grid-cols-4 px-4 py-4 text-sm items-center">
+          <span className="text-xs text-neutral-500 tabular-nums">{e.rank}</span>
+          <span className="col-span-2 text-sm">{e.username}</span>
+          <span className="text-right tabular-nums">{e.totalScore}</span>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -235,25 +301,27 @@ function ResolutionPanel({
   const chartData = challenge.prices.map(p => ({ date: p.date, close: p.close }));
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
+    <div className="space-y-6 max-w-4xl">
+      <div className="flex items-start justify-between">
         <div>
-          <p className="text-lg font-semibold">
+          <h2 className="text-2xl font-light tracking-tight">
             {challenge.ticker} — {challenge.companyName}
+          </h2>
+          <p className="text-xs text-neutral-500 tracking-widest uppercase mt-1">
+            Challenge vom {challenge.challengeDate}
           </p>
-          <p className="text-xs text-gray-500">Challenge vom {challenge.challengeDate}</p>
         </div>
         {challenge.currentPrice !== null && (
           <div className="text-right">
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Aktueller Kurs</p>
-            <p className="text-lg font-semibold">${challenge.currentPrice.toFixed(2)}</p>
+            <p className="text-xs text-neutral-500 tracking-widest uppercase mb-1">Aktueller Kurs</p>
+            <p className="text-2xl font-light tabular-nums">${challenge.currentPrice.toFixed(2)}</p>
           </div>
         )}
       </div>
 
       {chartData.length > 0 && (
-        <div className="bg-gray-900 rounded-xl p-3">
-          <SimpleLineChart data={chartData} height={220} color="#34d399" />
+        <div className="border border-neutral-900 bg-neutral-950 p-4">
+          <SimpleLineChart data={chartData} height={220} />
         </div>
       )}
     </div>
