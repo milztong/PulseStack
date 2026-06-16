@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from 'recharts';
+import { SimpleLineChart } from './SimpleLineChart';
 import { usePredictor } from '../hooks/usePredictor';
 import type { Direction } from '../types/Predictor';
 
@@ -116,15 +114,7 @@ function SpielenTab({
       </div>
 
       <div className="bg-gray-900 rounded-xl p-3 mb-4">
-        <ResponsiveContainer width="100%" height={260}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 11 }} minTickGap={30} />
-            <YAxis tick={{ fill: '#9ca3af', fontSize: 11 }} domain={['auto', 'auto']} />
-            <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }} />
-            <Line type="monotone" dataKey="close" stroke="#818cf8" strokeWidth={2} dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
+        <SimpleLineChart data={chartData} height={260} color="#818cf8" />
       </div>
 
       <p className="text-xs text-gray-500 mb-3">Zieldatum: {dailyStock.targetDate}</p>
@@ -263,15 +253,7 @@ function ResolutionPanel({
 
       {chartData.length > 0 && (
         <div className="bg-gray-900 rounded-xl p-3">
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="date" tick={{ fill: '#9ca3af', fontSize: 11 }} minTickGap={30} />
-              <YAxis tick={{ fill: '#9ca3af', fontSize: 11 }} domain={['auto', 'auto']} />
-              <Tooltip contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }} />
-              <Line type="monotone" dataKey="close" stroke="#34d399" strokeWidth={2} dot={false} />
-            </LineChart>
-          </ResponsiveContainer>
+          <SimpleLineChart data={chartData} height={220} color="#34d399" />
         </div>
       )}
     </div>
