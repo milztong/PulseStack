@@ -4,11 +4,14 @@ import { ChannelFeed } from './components/ChannelFeed';
 import { LoginPage } from './components/LoginPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ChatPanel } from './components/ChatPanel';
-import { PredictorView } from './components/PredictorView';
 import { useAuth } from './hooks/useAuth';
 
 const AnalyticsDashboard = lazy(() =>
   import('./components/AnalyticsDashboard').then(m => ({ default: m.AnalyticsDashboard }))
+);
+
+const PredictorView = lazy(() =>
+  import('./components/PredictorView').then(m => ({ default: m.PredictorView }))
 );
 
 const API_URL = `${import.meta.env.VITE_INGESTION_URL ?? 'http://localhost:8081'}/api/v1/channels`;
@@ -116,7 +119,9 @@ export default function App() {
         )}
         {view === 'predictor' && (
           <ErrorBoundary>
-            <PredictorView token={auth.token} />
+            <Suspense fallback={<div className="flex-1 flex items-center justify-center text-gray-400">Loading predictor…</div>}>
+              <PredictorView token={auth.token} />
+            </Suspense>
           </ErrorBoundary>
         )}
       </div>
