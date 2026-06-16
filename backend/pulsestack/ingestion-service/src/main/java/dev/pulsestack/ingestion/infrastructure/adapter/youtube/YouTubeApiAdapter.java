@@ -44,6 +44,7 @@ public class YouTubeApiAdapter implements NewsSourcePort {
                             .queryParam("q", channel.name())
                             .queryParam("type", "video")
                             .queryParam("order", "date")
+                            .queryParam("relevanceLanguage", "en")
                             .queryParam("maxResults", MAX_RESULTS)
                             .queryParam("key", apiKey)
                             .build())
