@@ -26,4 +26,5 @@ export const CHANNELS: Channel[] = [
   { id: '', name: 'fitness',     displayName: 'Fitness',       description: 'Workout, nutrition, health' },
   { id: '', name: 'movies',      displayName: 'Movies & TV',   description: 'Films, series, streaming' },
   { id: '', name: 'food',        displayName: 'Food',          description: 'Recipes, restaurants, food trends' },
+  { id: '', name: 'predictions', displayName: 'Stock Predictions', description: 'Live predictions from StockPredictor' },
 ];
