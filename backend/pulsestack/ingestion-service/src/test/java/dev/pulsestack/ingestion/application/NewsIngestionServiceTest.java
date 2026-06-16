@@ -69,7 +69,7 @@ class NewsIngestionServiceTest {
     @Test
     @DisplayName("should publish new item when not seen before")
     void should_publishItem_when_itemIsNew() {
-        when(channelLoader.loadAll()).thenReturn(List.of(TEST_CHANNEL));
+        when(channelLoader.loadIngestable()).thenReturn(List.of(TEST_CHANNEL));
         when(mockAdapter.fetchLatest(TEST_CHANNEL)).thenReturn(List.of(TEST_ITEM));
         when(duplicateChecker.isAlreadySeen(TEST_ITEM.externalId())).thenReturn(false);
 
@@ -81,7 +81,7 @@ class NewsIngestionServiceTest {
     @Test
     @DisplayName("should skip item when already seen (duplicate)")
     void should_skipItem_when_itemIsDuplicate() {
-        when(channelLoader.loadAll()).thenReturn(List.of(TEST_CHANNEL));
+        when(channelLoader.loadIngestable()).thenReturn(List.of(TEST_CHANNEL));
         when(mockAdapter.fetchLatest(TEST_CHANNEL)).thenReturn(List.of(TEST_ITEM));
         when(duplicateChecker.isAlreadySeen(TEST_ITEM.externalId())).thenReturn(true);
 

@@ -22,4 +22,12 @@ public class JpaChannelLoader implements ChannelLoader {
                         e.getDisplayName(), e.getDescription()))
                 .toList();
     }
+
+    @Override
+    public List<Channel> loadIngestable() {
+        return repository.findByExternalOnlyFalse().stream()
+                .map(e -> new Channel(e.getId(), e.getName(),
+                        e.getDisplayName(), e.getDescription()))
+                .toList();
+    }
 }

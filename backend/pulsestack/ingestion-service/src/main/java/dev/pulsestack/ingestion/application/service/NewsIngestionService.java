@@ -46,7 +46,7 @@ public class NewsIngestionService {
     @Scheduled(initialDelay = 0, fixedDelayString = "PT8H")
     public void runIngestionForAllChannels() {
         log.info("Starting ingestion run for all channels and sources");
-        List<Channel> channels = channelLoader.loadAll();
+        List<Channel> channels = channelLoader.loadIngestable();
 
         channels.forEach(channel ->
                 sourceAdapters.values().forEach(adapter ->

@@ -20,6 +20,9 @@ public class ChannelEntity {
     @Column
     private String description;
 
+    @Column(name = "external_only", nullable = false)
+    private boolean externalOnly;
+
     protected ChannelEntity() {}
 
     public ChannelEntity(String name, String displayName, String description) {
@@ -32,6 +35,7 @@ public class ChannelEntity {
     public String getName() { return name; }
     public String getDisplayName() { return displayName; }
     public String getDescription() { return description; }
+    public boolean isExternalOnly() { return externalOnly; }
 
     public void setDisplayName(String displayName) { this.displayName = displayName; }
     public void setDescription(String description) { this.description = description; }

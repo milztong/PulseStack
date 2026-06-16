@@ -4,6 +4,7 @@ import { ChannelFeed } from './components/ChannelFeed';
 import { LoginPage } from './components/LoginPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ChatPanel } from './components/ChatPanel';
+import { PredictorView } from './components/PredictorView';
 import { useAuth } from './hooks/useAuth';
 
 const AnalyticsDashboard = lazy(() =>
@@ -19,7 +20,7 @@ interface ChannelData {
   description?: string;
 }
 
-type View = 'feed' | 'analytics';
+type View = 'feed' | 'analytics' | 'predictor';
 
 export default function App() {
   const { auth, login, register, logout } = useAuth();
@@ -62,6 +63,14 @@ export default function App() {
           >
             Analytics
           </button>
+          <button
+            onClick={() => setView('predictor')}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              view === 'predictor' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            Predictor
+          </button>
         </div>
         <div className="flex items-center gap-3 text-sm">
           <span className="text-gray-400">
@@ -103,6 +112,11 @@ export default function App() {
             <Suspense fallback={<div className="flex-1 flex items-center justify-center text-gray-400">Loading analytics…</div>}>
               <AnalyticsDashboard />
             </Suspense>
+          </ErrorBoundary>
+        )}
+        {view === 'predictor' && (
+          <ErrorBoundary>
+            <PredictorView token={auth.token} />
           </ErrorBoundary>
         )}
       </div>
