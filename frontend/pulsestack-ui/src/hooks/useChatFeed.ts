@@ -80,10 +80,10 @@ export function useChatFeed(channelId: string | null, username: string | null) {
 
         heartbeatRef.current = setInterval(() => {
           if (client.connected) {
-            client.publish({ destination: '/app/presence.heartbeat', body: JSON.stringify(channelId) });
+            client.publish({ destination: '/app/presence.heartbeat', body: channelId });
           }
         }, HEARTBEAT_INTERVAL_MS);
-        client.publish({ destination: '/app/presence.heartbeat', body: JSON.stringify(channelId) });
+        client.publish({ destination: '/app/presence.heartbeat', body: channelId });
       },
 
       onDisconnect: () => {
