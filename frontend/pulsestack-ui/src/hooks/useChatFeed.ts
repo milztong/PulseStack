@@ -47,7 +47,9 @@ export function useChatFeed(channelId: string | null, username: string | null) {
 
     const token = getToken();
 
-    fetch(`${CHAT_API_URL}/channel/${channelId}`)
+    fetch(`${CHAT_API_URL}/channel/${channelId}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
       .then(r => r.json())
       .then((history: ChatMessage[]) => setMessages(history.reverse()))
       .catch(() => setMessages([]));

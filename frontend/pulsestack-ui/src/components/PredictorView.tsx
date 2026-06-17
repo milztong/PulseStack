@@ -13,7 +13,7 @@ interface PredictorViewProps {
 export function PredictorView({ token, username }: PredictorViewProps) {
   const [tab, setTab] = useState<Tab>('spielen');
   const {
-    dailyStock, myPredictions, leaderboard, resolvedChallenge,
+    dailyStock, dailyStockStatus, myPredictions, leaderboard, resolvedChallenge,
     loading, error, submitPrediction,
   } = usePredictor(token);
 
@@ -52,7 +52,7 @@ export function PredictorView({ token, username }: PredictorViewProps) {
           {error && <p className="text-red-400 text-sm">{error}</p>}
 
           {!loading && tab === 'spielen' && (
-            <SpielenTab dailyStock={dailyStock} onSubmit={submitPrediction} />
+            <SpielenTab dailyStock={dailyStock} dailyStockStatus={dailyStockStatus} onSubmit={submitPrediction} />
           )}
           {!loading && tab === 'dashboard' && (
             <DashboardTab predictions={myPredictions} username={username} />
@@ -81,9 +81,11 @@ export function PredictorView({ token, username }: PredictorViewProps) {
 
 function SpielenTab({
   dailyStock,
+  dailyStockStatus,
   onSubmit,
 }: {
   dailyStock: ReturnType<typeof usePredictor>['dailyStock'];
+  dailyStockStatus: number | null;
   onSubmit: (stockId: string, direction: Direction, predictedPrice: number) => Promise<void>;
 }) {
   const [direction, setDirection] = useState<Direction | null>(null);
@@ -93,7 +95,12 @@ function SpielenTab({
   const [submitted, setSubmitted] = useState(false);
 
   if (!dailyStock) {
-    return <p className="text-neutral-600 text-sm">Heutige Challenge noch nicht verfügbar.</p>;
+    const hint = dailyStockStatus === 401 || dailyStockStatus === 403
+      ? `Authentifizierung fehlgeschlagen (${dailyStockStatus}).`
+      : dailyStockStatus
+        ? `Keine Challenge heute (HTTP ${dailyStockStatus}).`
+        : 'Heutige Challenge noch nicht verfügbar.';
+    return <p className="text-neutral-600 text-sm">{hint}</p>;
   }
 
   const lastPrice = dailyStock.prices[dailyStock.prices.length - 1]?.close ?? 0;

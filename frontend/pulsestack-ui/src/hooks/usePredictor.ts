@@ -17,12 +17,16 @@ export function usePredictor(token: string | null) {
   const [resolvedChallenge, setResolvedChallenge] = useState<ResolvedChallenge | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [dailyStockStatus, setDailyStockStatus] = useState<number | null>(null);
 
   const loadDailyStock = useCallback(() => {
     return fetch(`${BASE_URL}/stocks/daily`, { headers: authHeaders(token) })
-      .then(r => (r.ok ? r.json() : null))
+      .then(r => {
+        setDailyStockStatus(r.status);
+        return r.ok ? r.json() : null;
+      })
       .then(setDailyStock)
-      .catch(() => setDailyStock(null));
+      .catch(() => { setDailyStockStatus(null); setDailyStock(null); });
   }, [token]);
 
   const loadMyPredictions = useCallback(async () => {
@@ -102,7 +106,7 @@ export function usePredictor(token: string | null) {
   }, [token, loadMyPredictions]);
 
   return {
-    dailyStock, myPredictions, leaderboard, resolvedChallenge,
+    dailyStock, dailyStockStatus, myPredictions, leaderboard, resolvedChallenge,
     loading, error, refresh, submitPrediction,
   };
 }
