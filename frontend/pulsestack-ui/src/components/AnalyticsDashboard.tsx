@@ -1,7 +1,4 @@
 import { useEffect, useState } from 'react';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-} from 'recharts';
 
 interface TrendDataPoint {
   channelId: string;
@@ -14,12 +11,102 @@ interface TrendDataPoint {
 
 const ANALYTICS_URL = `${import.meta.env.VITE_PROCESSING_URL ?? 'http://localhost:8083'}/api/v1/analytics/trends`;
 
-const SOURCE_COLORS = {
-  reddit:  '#ff4500',
-  youtube: '#ff0000',
-  github:  '#6e40c9',
-  newsapi: '#0ea5e9',
-};
+const SOURCES = [
+  { key: 'reddit',  label: 'Reddit',  color: '#ff4500' },
+  { key: 'youtube', label: 'YouTube', color: '#ff0000' },
+  { key: 'github',  label: 'GitHub',  color: '#6e40c9' },
+  { key: 'newsapi', label: 'NewsAPI', color: '#0ea5e9' },
+] as const;
+
+interface ChartRow {
+  name: string;
+  reddit: number;
+  youtube: number;
+  github: number;
+  newsapi: number;
+}
+
+function SimpleBarChart({ data }: { data: ChartRow[] }) {
+  if (data.length === 0) return null;
+
+  const W = 800;
+  const H = 360;
+  const MARGIN = { top: 16, right: 16, bottom: 80, left: 40 };
+  const innerW = W - MARGIN.left - MARGIN.right;
+  const innerH = H - MARGIN.top - MARGIN.bottom;
+
+  const maxVal = Math.max(1, ...data.flatMap(d => SOURCES.map(s => d[s.key])));
+  const groupW = innerW / data.length;
+  const barW = Math.max(4, (groupW - 8) / SOURCES.length);
+
+  const yTicks = 5;
+  const yStep = Math.ceil(maxVal / yTicks);
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ maxHeight: 400 }}>
+      <g transform={`translate(${MARGIN.left},${MARGIN.top})`}>
+        {/* grid lines */}
+        {Array.from({ length: yTicks + 1 }, (_, i) => {
+          const val = i * yStep;
+          const y = innerH - (val / (yStep * yTicks)) * innerH;
+          return (
+            <g key={i}>
+              <line x1={0} y1={y} x2={innerW} y2={y} stroke="#374151" strokeDasharray="3 3" />
+              <text x={-6} y={y + 4} textAnchor="end" fill="#9ca3af" fontSize={11}>{val}</text>
+            </g>
+          );
+        })}
+
+        {/* bars */}
+        {data.map((row, gi) => {
+          const groupX = gi * groupW;
+          return (
+            <g key={row.name}>
+              {SOURCES.map((src, si) => {
+                const val = row[src.key];
+                const barH = (val / (yStep * yTicks)) * innerH;
+                const x = groupX + si * barW + 4;
+                const y = innerH - barH;
+                return (
+                  <g key={src.key}>
+                    <rect x={x} y={y} width={barW - 1} height={barH} fill={src.color} rx={2} />
+                    {val > 0 && (
+                      <text x={x + barW / 2} y={y - 3} textAnchor="middle" fill={src.color} fontSize={9}>{val}</text>
+                    )}
+                  </g>
+                );
+              })}
+              {/* x-axis label */}
+              <text
+                x={groupX + groupW / 2}
+                y={innerH + 16}
+                textAnchor="end"
+                fill="#9ca3af"
+                fontSize={11}
+                transform={`rotate(-35, ${groupX + groupW / 2}, ${innerH + 16})`}
+              >
+                {row.name.length > 14 ? row.name.slice(0, 13) + '…' : row.name}
+              </text>
+            </g>
+          );
+        })}
+
+        {/* x-axis line */}
+        <line x1={0} y1={innerH} x2={innerW} y2={innerH} stroke="#4b5563" />
+      </g>
+
+      {/* legend */}
+      <g transform={`translate(${MARGIN.left}, ${H - 18})`}>
+        {SOURCES.map((src, i) => (
+          <g key={src.key} transform={`translate(${i * 110}, 0)`}>
+            <rect width={10} height={10} fill={src.color} rx={2} />
+            <text x={14} y={9} fill="#9ca3af" fontSize={11}>{src.label}</text>
+          </g>
+        ))}
+      </g>
+    </svg>
+  );
+}
 
 export function AnalyticsDashboard() {
   const [data, setData] = useState<TrendDataPoint[]>([]);
@@ -37,14 +124,14 @@ export function AnalyticsDashboard() {
       .finally(() => setLoading(false));
   }, [days]);
 
-  const chartData = data
+  const chartData: ChartRow[] = data
     .filter(d => d.reddit + d.youtube + d.github + d.newsapi > 0)
     .map(d => ({
       name: d.channelName,
-      Reddit: d.reddit,
-      YouTube: d.youtube,
-      GitHub: d.github,
-      NewsAPI: d.newsapi,
+      reddit: d.reddit,
+      youtube: d.youtube,
+      github: d.github,
+      newsapi: d.newsapi,
     }));
 
   return (
@@ -78,41 +165,18 @@ export function AnalyticsDashboard() {
 
       {!loading && chartData.length > 0 && (
         <div className="bg-gray-900 rounded-2xl p-4">
-          <ResponsiveContainer width="100%" height={420}>
-            <BarChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 60 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis
-                dataKey="name"
-                tick={{ fill: '#9ca3af', fontSize: 12 }}
-                angle={-40}
-                textAnchor="end"
-                interval={0}
-              />
-              <YAxis tick={{ fill: '#9ca3af', fontSize: 12 }} allowDecimals={false} />
-              <Tooltip
-                contentStyle={{ backgroundColor: '#1f2937', border: 'none', borderRadius: '8px' }}
-                labelStyle={{ color: '#f9fafb', fontWeight: 600 }}
-                itemStyle={{ color: '#d1d5db' }}
-              />
-              <Legend wrapperStyle={{ paddingTop: '16px', color: '#9ca3af' }} />
-              <Bar dataKey="Reddit"  fill={SOURCE_COLORS.reddit}  radius={[3,3,0,0]} />
-              <Bar dataKey="YouTube" fill={SOURCE_COLORS.youtube} radius={[3,3,0,0]} />
-              <Bar dataKey="GitHub"  fill={SOURCE_COLORS.github}  radius={[3,3,0,0]} />
-              <Bar dataKey="NewsAPI" fill={SOURCE_COLORS.newsapi} radius={[3,3,0,0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          <SimpleBarChart data={chartData} />
         </div>
       )}
 
       {!loading && chartData.length > 0 && (
         <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {(['Reddit','YouTube','GitHub','NewsAPI'] as const).map((src) => {
-            const key = src.toLowerCase() as keyof typeof SOURCE_COLORS;
-            const total = data.reduce((s, d) => s + (d[key as keyof TrendDataPoint] as number), 0);
+          {SOURCES.map((src) => {
+            const total = data.reduce((s, d) => s + d[src.key], 0);
             return (
-              <div key={src} className="bg-gray-900 rounded-xl p-4">
-                <p className="text-xs text-gray-400 uppercase tracking-wide">{src}</p>
-                <p className="text-3xl font-bold mt-1" style={{ color: SOURCE_COLORS[key] }}>{total}</p>
+              <div key={src.key} className="bg-gray-900 rounded-xl p-4">
+                <p className="text-xs text-gray-400 uppercase tracking-wide">{src.label}</p>
+                <p className="text-3xl font-bold mt-1" style={{ color: src.color }}>{total}</p>
                 <p className="text-xs text-gray-500 mt-1">items in period</p>
               </div>
             );
