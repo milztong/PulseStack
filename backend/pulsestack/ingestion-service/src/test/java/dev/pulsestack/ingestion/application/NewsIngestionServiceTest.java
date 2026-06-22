@@ -94,7 +94,7 @@ class NewsIngestionServiceTest {
     @DisplayName("should continue processing other channels when one adapter fails")
     void should_continueProcessing_when_adapterThrowsException() {
         Channel failingChannel = new Channel(UUID.randomUUID(), "ai", "AI", "AI news");
-        when(channelLoader.loadAll()).thenReturn(List.of(TEST_CHANNEL, failingChannel));
+        when(channelLoader.loadIngestable()).thenReturn(List.of(TEST_CHANNEL, failingChannel));
         when(mockAdapter.fetchLatest(TEST_CHANNEL)).thenReturn(List.of(TEST_ITEM));
         when(mockAdapter.fetchLatest(failingChannel)).thenThrow(new RuntimeException("API timeout"));
         when(duplicateChecker.isAlreadySeen(anyString())).thenReturn(false);
