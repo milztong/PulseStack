@@ -1,0 +1,66 @@
+name: CI / CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: Build, Test & Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run tests with JaCoCo
+        working-directory: backend/pulsestack
+        run: mvn -B verify --no-transfer-progress
+        env:
+          PULSESTACK_JWT_SECRET: test-secret-key-must-be-at-least-32-chars
+          PULSESTACK_JWT_EXPIRATION_MS: 3600000
+
+      - name: Upload JaCoCo reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-reports
+          path: |
+            backend/pulsestack/*/target/site/jacoco/
+          retention-days: 14
+
+      - name: Coverage summary (ingestion-service)
+        uses: madrapps/jacoco-report@v1.6.1
+        with:
+          paths: backend/pulsestack/ingestion-service/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 40
+          min-coverage-changed-files: 50
+          title: Coverage — ingestion-service
+
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Deploy auth-service
+        run: curl -s --fail-with-body "${{ secrets.RENDER_DEPLOY_AUTH }}"
+
+      - name: Deploy ingestion-service
+        run: curl -s --fail-with-body "${{ secrets.RENDER_DEPLOY_INGESTION }}"
+
+      - name: Deploy processing-service
+        run: curl -s --fail-with-body "${{ secrets.RENDER_DEPLOY_PROCESSING }}"
+
+      - name: Deploy chat-service
+        run: curl -s --fail-with-body "${{ secrets.RENDER_DEPLOY_CHAT }}"
