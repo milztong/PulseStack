@@ -3,6 +3,7 @@ package dev.pulsestack.ingestion.infrastructure.adapter.reddit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -11,6 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.util.Map;
 
 @Component
+@ConditionalOnProperty(name = "pulsestack.reddit.enabled", havingValue = "true")
 public class RedditTokenProvider {
 
     private static final Logger log = LoggerFactory.getLogger(RedditTokenProvider.class);

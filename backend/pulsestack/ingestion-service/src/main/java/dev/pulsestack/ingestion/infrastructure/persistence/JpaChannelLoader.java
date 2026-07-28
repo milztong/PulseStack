@@ -18,16 +18,19 @@ public class JpaChannelLoader implements ChannelLoader {
     @Override
     public List<Channel> loadAll() {
         return repository.findAll().stream()
-                .map(e -> new Channel(e.getId(), e.getName(),
-                        e.getDisplayName(), e.getDescription()))
+                .map(JpaChannelLoader::toDomain)
                 .toList();
     }
 
     @Override
     public List<Channel> loadIngestable() {
         return repository.findByExternalOnlyFalse().stream()
-                .map(e -> new Channel(e.getId(), e.getName(),
-                        e.getDisplayName(), e.getDescription()))
+                .map(JpaChannelLoader::toDomain)
                 .toList();
+    }
+
+    private static Channel toDomain(ChannelEntity e) {
+        return new Channel(e.getId(), e.getName(), e.getDisplayName(),
+                e.getDescription(), e.getSourceQueries());
     }
 }

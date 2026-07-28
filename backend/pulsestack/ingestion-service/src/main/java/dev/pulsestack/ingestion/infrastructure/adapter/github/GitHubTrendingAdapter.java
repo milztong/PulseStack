@@ -43,7 +43,7 @@ public class GitHubTrendingAdapter implements NewsSourcePort {
             GitHubSearchResponse response = webClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/search/repositories")
-                            .queryParam("q", channel.name())
+                            .queryParam("q", channel.queryFor(NewsSource.GITHUB))
                             .queryParam("sort", "stars")
                             .queryParam("order", "desc")
                             .queryParam("per_page", MAX_RESULTS)

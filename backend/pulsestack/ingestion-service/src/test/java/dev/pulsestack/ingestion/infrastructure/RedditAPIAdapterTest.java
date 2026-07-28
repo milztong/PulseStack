@@ -2,6 +2,7 @@ package dev.pulsestack.ingestion.infrastructure;
 
 import dev.pulsestack.domain.model.Channel;
 import dev.pulsestack.domain.model.NewsItem;
+import dev.pulsestack.domain.model.NewsSource;
 import dev.pulsestack.ingestion.infrastructure.adapter.reddit.RedditApiAdapter;
 import dev.pulsestack.ingestion.infrastructure.adapter.reddit.RedditTokenProvider;
 import okhttp3.mockwebserver.MockResponse;
@@ -14,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -109,5 +111,40 @@ class RedditApiAdapterTest {
         List<NewsItem> result = sut.fetchLatest(JAVA_CHANNEL);
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("should request the channel name as subreddit when no query override is set")
+    void should_requestChannelName_when_noQueryOverrideIsSet() throws InterruptedException {
+        mockWebServer.enqueue(emptyRedditResponse());
+
+        sut.fetchLatest(JAVA_CHANNEL);
+
+        assertThat(mockWebServer.takeRequest().getPath()).startsWith("/r/java/hot");
+    }
+
+    @Test
+    @DisplayName("should request the multireddit unencoded when a Reddit query override is set")
+    void should_requestMultireddit_when_queryOverrideIsSet() throws InterruptedException {
+        Channel aiChannel = new Channel(
+                UUID.randomUUID(), "ai", "AI", "LLM providers",
+                Map.of(NewsSource.REDDIT, "LocalLLaMA+OpenAI+ClaudeAI")
+        );
+        mockWebServer.enqueue(emptyRedditResponse());
+
+        sut.fetchLatest(aiChannel);
+
+        // Das '+' muss als Multireddit-Trenner durchkommen, nicht als %2B ankommen.
+        assertThat(mockWebServer.takeRequest().getPath())
+                .startsWith("/r/LocalLLaMA+OpenAI+ClaudeAI/hot");
+    }
+
+    private static MockResponse emptyRedditResponse() {
+        return new MockResponse()
+                .setResponseCode(200)
+                .addHeader("Content-Type", "application/json")
+                .setBody("""
+                    {"data": {"children": []}}
+                """);
     }
 }

@@ -40,7 +40,7 @@ public class NewsApiAdapter implements NewsSourcePort {
             NewsApiResponse response = webClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path("/everything")
-                            .queryParam("q", channel.name())
+                            .queryParam("q", channel.queryFor(NewsSource.NEWSAPI))
                             .queryParam("sortBy", "publishedAt")
                             .queryParam("pageSize", PAGE_SIZE)
                             .queryParam("language", "en")

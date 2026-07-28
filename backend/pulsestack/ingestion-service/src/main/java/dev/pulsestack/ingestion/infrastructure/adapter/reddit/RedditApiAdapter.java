@@ -8,14 +8,15 @@ import dev.pulsestack.ingestion.domain.port.NewsSourcePort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 
 @Component
+@ConditionalOnProperty(name = "pulsestack.reddit.enabled", havingValue = "true")
 public class RedditApiAdapter implements NewsSourcePort {
 
     private static final Logger log = LoggerFactory.getLogger(RedditApiAdapter.class);
@@ -44,9 +45,15 @@ public class RedditApiAdapter implements NewsSourcePort {
         try {
             String token = tokenProvider.getAccessToken();
 
+            // Multireddit-Syntax: "a+b+c" zieht aus mehreren Subreddits gleichzeitig.
+            // Als Template-Variable wuerde das '+' zu %2B encodiert und der Trenner ginge verloren,
+            // deshalb wird der Subreddit als literales Pfadsegment gesetzt.
+            String subreddit = channel.queryFor(NewsSource.REDDIT);
             RedditResponse response = webClient.get()
-                    .uri("/r/{subreddit}/hot?limit={limit}",
-                            channel.name(), MAX_POSTS)
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/r/" + subreddit + "/hot")
+                            .queryParam("limit", MAX_POSTS)
+                            .build())
                     .header("Authorization", "Bearer " + token)
                     .retrieve()
                     .bodyToMono(RedditResponse.class)

@@ -6,7 +6,7 @@ export const CHANNELS: Channel[] = [
   { id: '', name: 'devops',      displayName: 'DevOps',        description: 'Docker, Kubernetes, CI/CD' },
   { id: '', name: 'databases',   displayName: 'Databases',     description: 'PostgreSQL, Redis, MongoDB' },
   { id: '', name: 'webdev',      displayName: 'Web Dev',       description: 'Frontend, backend, CSS, JS' },
-  { id: '', name: 'ai',          displayName: 'AI & ML',       description: 'Machine learning, LLMs' },
+  { id: '', name: 'ai',          displayName: 'AI & ML',       description: 'LLM-Anbieter: OpenAI, Anthropic, Google, DeepSeek' },
   { id: '', name: 'datascience', displayName: 'Data Science',  description: 'Pandas, Spark, SQL, analytics' },
   { id: '', name: 'startups',    displayName: 'Startups',      description: 'Funding, launches, founders' },
   { id: '', name: 'security',    displayName: 'Security',      description: 'Cybersecurity, vulnerabilities' },

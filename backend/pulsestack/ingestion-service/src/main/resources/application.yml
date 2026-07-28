@@ -50,6 +50,7 @@ management:
 
 pulsestack:
   reddit:
+    enabled: ${REDDIT_ENABLED:false}   # Reddit-API-Zugang abgelehnt -> Adapter deaktiviert
     base-url: https://oauth.reddit.com
     client-id: ${REDDIT_CLIENT_ID:}
     client-secret: ${REDDIT_CLIENT_SECRET:}
