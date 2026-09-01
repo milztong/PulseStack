@@ -53,14 +53,50 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     steps:
+      # Deploy ist best-effort und darf die gruene Test-Pipeline nicht rot faerben:
+      # ein fehlendes Secret wird uebersprungen, ein fehlschlagender Hook (z. B.
+      # suspendierter Render-Service) wird als Warnung im Step-Log sichtbar,
+      # blockiert aber die uebrigen Services nicht.
       - name: Deploy auth-service
-        run: curl -s --fail-with-body "${{ secrets.RENDER_DEPLOY_AUTH }}"
+        continue-on-error: true
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_AUTH }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::notice::RENDER_DEPLOY_AUTH not set — skipping auth-service."
+            exit 0
+          fi
+          curl -sS --fail-with-body --max-time 60 "$HOOK"
 
       - name: Deploy ingestion-service
-        run: curl -s --fail-with-body "${{ secrets.RENDER_DEPLOY_INGESTION }}"
+        continue-on-error: true
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_INGESTION }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::notice::RENDER_DEPLOY_INGESTION not set — skipping ingestion-service."
+            exit 0
+          fi
+          curl -sS --fail-with-body --max-time 60 "$HOOK"
 
       - name: Deploy processing-service
-        run: curl -s --fail-with-body "${{ secrets.RENDER_DEPLOY_PROCESSING }}"
+        continue-on-error: true
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_PROCESSING }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::notice::RENDER_DEPLOY_PROCESSING not set — skipping processing-service."
+            exit 0
+          fi
+          curl -sS --fail-with-body --max-time 60 "$HOOK"
 
       - name: Deploy chat-service
-        run: curl -s --fail-with-body "${{ secrets.RENDER_DEPLOY_CHAT }}"
+        continue-on-error: true
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_CHAT }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "::notice::RENDER_DEPLOY_CHAT not set — skipping chat-service."
+            exit 0
+          fi
+          curl -sS --fail-with-body --max-time 60 "$HOOK"
