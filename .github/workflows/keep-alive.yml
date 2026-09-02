@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      PROCESSING_HEALTH_URL: https://pulsestack-processing.onrender.com/actuator/health
+      PROCESSING_HEALTH_URL: https://pulsestack.onrender.com/actuator/health
 
     steps:
       - name: Check demo window
