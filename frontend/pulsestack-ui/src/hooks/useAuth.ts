@@ -1,7 +1,8 @@
 import { useState, useCallback } from 'react';
 import type { AuthState } from '../types/Auth';
+import { AUTH_BASE_URL } from '../config/api';
 
-const AUTH_URL = `${import.meta.env.VITE_AUTH_URL ?? 'http://localhost:8084'}/api/v1/auth`;
+const AUTH_URL = `${AUTH_BASE_URL}/api/v1/auth`;
 const STORAGE_KEY = 'pulsestack_auth';
 
 function loadFromStorage(): AuthState {

@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Client } from '@stomp/stompjs';
 import type { IMessage } from '@stomp/stompjs';
 import type { NewsItem } from '../types';
+import { PROCESSING_BASE_URL } from '../config/api';
 
-const BASE_URL = import.meta.env.VITE_PROCESSING_URL ?? 'http://localhost:8083';
+const BASE_URL = PROCESSING_BASE_URL;
 const WEBSOCKET_URL = BASE_URL.replace(/^http/, 'ws') + '/ws';
 const MAX_ITEMS = 50;
 

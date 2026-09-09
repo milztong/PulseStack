@@ -13,6 +13,6 @@ RUN mvn package -pl auth-service -am -DskipTests -q
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=build /app/auth-service/target/*.jar app.jar
+COPY --from=build /app/auth-service/target/*-exec.jar app.jar
 EXPOSE 8084
 ENTRYPOINT ["java", "-Xmx350m", "-XX:MaxMetaspaceSize=128m", "-XX:+UseSerialGC", "-jar", "app.jar"]

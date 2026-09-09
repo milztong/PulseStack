@@ -13,6 +13,6 @@ RUN mvn package -pl chat-service -am -DskipTests -q
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=build /app/chat-service/target/*.jar app.jar
+COPY --from=build /app/chat-service/target/*-exec.jar app.jar
 EXPOSE 8082
 ENTRYPOINT ["java", "-Xmx350m", "-XX:MaxMetaspaceSize=128m", "-XX:+UseSerialGC", "-jar", "app.jar"]

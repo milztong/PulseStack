@@ -1,0 +1,99 @@
+spring:
+  application:
+    name: pulsestack
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:pulsestack}
+    username: ${DB_USER:pulsestack}
+    password: ${DB_PASSWORD:password}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    locations: classpath:db/unified
+    baseline-on-migrate: true
+    baseline-version: 0
+    validate-on-migrate: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: processing-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "dev.pulsestack.*"
+        spring.json.use.type.headers: false
+        spring.json.value.default.type: "dev.pulsestack.domain.model.NewsItem"
+
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
+pulsestack:
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-in-production-min-32-chars}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  reddit:
+    enabled: ${REDDIT_ENABLED:false}
+    base-url: https://oauth.reddit.com
+    client-id: ${REDDIT_CLIENT_ID:}
+    client-secret: ${REDDIT_CLIENT_SECRET:}
+  youtube:
+    api-key: ${YOUTUBE_API_KEY:}
+  github:
+    token: ${GITHUB_TOKEN:}
+  newsapi:
+    key: ${NEWSAPI_KEY:}
+  ingest:
+    secret: ${PULSESTACK_INGEST_SECRET:change-me-in-production}
+  ingestion:
+    poll-interval-hours: 5
+    max-channels: 25
+    dedup-ttl-hours: 24
+    rich-preview-limit: 3
+  presence:
+    heartbeat-interval-seconds: 30
+    expiry-seconds: 60
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    dev.pulsestack: DEBUG
+    org.springframework.kafka: INFO

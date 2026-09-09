@@ -2,8 +2,9 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Client } from '@stomp/stompjs';
 import type { IMessage } from '@stomp/stompjs';
 import type { ChatMessage } from '../types/Chat';
+import { CHAT_BASE_URL } from '../config/api';
 
-const BASE_URL = import.meta.env.VITE_CHAT_URL ?? 'http://localhost:8082';
+const BASE_URL = CHAT_BASE_URL;
 const CHAT_WS_URL = BASE_URL.replace(/^http/, 'ws') + '/ws';
 const CHAT_API_URL = BASE_URL + '/api/v1/chat';
 const MAX_MESSAGES = 100;

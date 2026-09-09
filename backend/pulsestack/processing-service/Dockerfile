@@ -13,6 +13,6 @@ RUN mvn package -pl processing-service -am -DskipTests -q
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=build /app/processing-service/target/*.jar app.jar
+COPY --from=build /app/processing-service/target/*-exec.jar app.jar
 EXPOSE 8083
 ENTRYPOINT ["java", "-Xmx350m", "-XX:MaxMetaspaceSize=128m", "-XX:+UseSerialGC", "-jar", "app.jar"]

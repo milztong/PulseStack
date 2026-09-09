@@ -4,6 +4,7 @@ import { NewsCard } from './NewsCard';
 import { NewsCardSkeletonList } from './NewsCardSkeleton';
 import { CHANNELS } from '../data/channels';
 import type { NewsItem } from '../types';
+import { PROCESSING_BASE_URL } from '../config/api';
 
 interface Props {
   channelId: string | null;
@@ -19,7 +20,7 @@ export function ChannelFeed({ channelId, channelName }: Props) {
   useEffect(() => {
     if (!channelId) return;
     setLoading(true);
-    fetch(`${import.meta.env.VITE_PROCESSING_URL ?? 'http://localhost:8083'}/api/v1/news/channel/${channelId}`)
+    fetch(`${PROCESSING_BASE_URL}/api/v1/news/channel/${channelId}`)
       .then(res => res.json())
       .then(setHistoryItems)
       .catch(() => setHistoryItems([]))

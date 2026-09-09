@@ -5,6 +5,7 @@ import { LoginPage } from './components/LoginPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ChatPanel } from './components/ChatPanel';
 import { useAuth } from './hooks/useAuth';
+import { INGESTION_BASE_URL } from './config/api';
 
 const AnalyticsDashboard = lazy(() =>
   import('./components/AnalyticsDashboard').then(m => ({ default: m.AnalyticsDashboard }))
@@ -14,7 +15,7 @@ const PredictorView = lazy(() =>
   import('./components/PredictorView').then(m => ({ default: m.PredictorView }))
 );
 
-const API_URL = `${import.meta.env.VITE_INGESTION_URL ?? 'http://localhost:8081'}/api/v1/channels`;
+const API_URL = `${INGESTION_BASE_URL}/api/v1/channels`;
 
 interface ChannelData {
   id: string;

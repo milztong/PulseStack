@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { PROCESSING_BASE_URL } from '../config/api';
 
 interface TrendDataPoint {
   channelId: string;
@@ -9,7 +10,7 @@ interface TrendDataPoint {
   newsapi: number;
 }
 
-const ANALYTICS_URL = `${import.meta.env.VITE_PROCESSING_URL ?? 'http://localhost:8083'}/api/v1/analytics/trends`;
+const ANALYTICS_URL = `${PROCESSING_BASE_URL}/api/v1/analytics/trends`;
 
 const SOURCES = [
   { key: 'reddit',  label: 'Reddit',  color: '#ff4500' },

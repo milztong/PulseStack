@@ -8,6 +8,31 @@
 
 ---
 
+## Gemeinsames Deployment auf Render
+
+Für das kostenoptimierte Demo-Deployment bündelt das Modul `pulsestack-app` Auth,
+Ingestion, Processing und Chat in einer Spring-Boot-Anwendung auf einem Port.
+Kafka bleibt dabei unverändert als Event-Bus zwischen Ingestion und Processing
+aktiv. Die vier bisherigen Service-Module bleiben separat startbar und dienen als
+Rollback-Option.
+
+```bash
+mvn spring-boot:run -pl pulsestack-app -am
+```
+
+Der gemeinsame Dienst verwendet standardmäßig Port `8080` und auf Render den Wert
+aus `PORT`. Für Render wird `pulsestack-app/Dockerfile` mit dem Root Directory
+`backend/pulsestack` verwendet. Web- und Mobile-Clients können anschließend für
+Auth, Channels, News, Analytics und Chat dieselbe Basis-URL verwenden.
+
+Zusätzlich zu den bestehenden API-Schlüsseln benötigt der Dienst die gemeinsamen
+Variablen für PostgreSQL (`DB_*`), Redis (`REDIS_*`), Kafka (`KAFKA_*`),
+`JWT_SECRET` und `PULSESTACK_INGEST_SECRET`. Sobald das GitHub-Secret
+`RENDER_DEPLOY_PULSESTACK` gesetzt ist, deployt die CI nur noch den gemeinsamen
+Service und überspringt die vier Legacy-Hooks.
+
+---
+
 ## Architektur
 
 ```

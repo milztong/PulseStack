@@ -24,6 +24,7 @@
         <module>chat-service</module>
         <module>processing-service</module>
         <module>auth-service</module>
+        <module>pulsestack-app</module>
     </modules>
 
     <properties>

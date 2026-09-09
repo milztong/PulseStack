@@ -1,4 +1,4 @@
-name: Keep Processing Service Alive
+name: Keep PulseStack Service Alive
 
 on:
   schedule:
@@ -11,16 +11,16 @@ permissions:
   contents: read
 
 concurrency:
-  group: pulsestack-processing-keep-alive
+  group: pulsestack-keep-alive
   cancel-in-progress: true
 
 jobs:
-  ping-processing:
-    name: Ping processing-service
+  ping-pulsestack:
+    name: Ping PulseStack service
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      PROCESSING_HEALTH_URL: https://pulsestack.onrender.com/actuator/health
+      PULSESTACK_HEALTH_URL: https://pulsestack.onrender.com/actuator/health
 
     steps:
       - name: Check demo window
@@ -44,7 +44,7 @@ jobs:
             echo "Outside the weekday demo window; skipping the ping."
           fi
 
-      - name: Ping processing health endpoint
+      - name: Ping PulseStack health endpoint
         if: steps.demo-window.outputs.should_ping == 'true'
         shell: bash
         run: |
@@ -57,4 +57,4 @@ jobs:
             --retry-all-errors \
             --connect-timeout 15 \
             --max-time 120 \
-            "$PROCESSING_HEALTH_URL"
+            "$PULSESTACK_HEALTH_URL"
